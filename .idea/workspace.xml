@@ -2,24 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a8c58d43-aae3-433d-9cba-e45096f00253" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgentAnswers.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgentAnswers.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProblemResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ProblemResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Problems/ProblemSetList.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Problems/ProblemSetList.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SetResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/SetResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/AgentAnswers.csv" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/AgentAnswers.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/ProblemResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/ProblemResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/Problems/ProblemSetList.txt" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/Problems/ProblemSetList.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/SetResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/SetResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent$PossibleAnswer.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent$PossibleAnswer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent$TransType.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent$TransType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/ravensproject/Agent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/production/Project-Code-Java/student.zip" beforeDir="false" afterPath="$PROJECT_DIR$/class/production/Project-Code-Java/student.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ravensproject/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/ravensproject/Agent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
