@@ -11,6 +11,7 @@ import java.awt.image.*;
 import java.io.File;
 import java.nio.Buffer;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Your Agent for solving Raven's Progressive Matrices. You MUST modify this
@@ -34,7 +35,10 @@ public class Agent {
         ROTATE_180,
         ROTATE_270,
         NONE;
+    }
 
+    enum PatternType {
+        HORIZONTAL_NO_CHANGE
     }
 
     class PossibleAnswer {
@@ -78,9 +82,97 @@ public class Agent {
 
         if (problem.getProblemType().equals("2x2")) {
             return solve2x2(problem);
+        } else if (problem.getProblemType().equals("3x3")) {
+            return solve3x3(problem); 
         }
 
         return -1;
+    }
+
+    private int solve3x3(RavensProblem problem) {
+        HashMap<String, RavensFigure> figures = problem.getFigures();
+        HashMap<String, BufferedImage> answers = new HashMap<>();
+
+
+        PatternType pattern = determinePatternType(figures);
+        int[] choices = {1, 2, 3, 4, 5, 6, 7, 8};
+
+        switch (pattern) {
+            case HORIZONTAL_NO_CHANGE: {
+                return findAnswerLike("H", figures, choices, 100.0).index;
+            }
+        }
+
+        return -1;
+    }
+
+    private PossibleAnswer findAnswerLike(String fig, HashMap<String, RavensFigure> figs, int[] choices, double expectedSimilarity) {
+
+
+        HashMap<Integer, Double> similarityScoreMap = new HashMap<>();
+        BufferedImage H = getImage(figs.get(fig));
+
+        for (int i : choices) {
+            double similarityOfCn = compareSimilarity(H, getImage(figs.get(Integer.toString(i))));
+            similarityScoreMap.put(i, similarityOfCn);
+            System.out.println("similarityOf" + fig + i + " = " + similarityOfCn);
+
+//            // Check if any are exactly equal
+            if (expectedSimilarity == similarityScoreMap.get(i)) {
+                return new PossibleAnswer(i, 100.0);
+            }
+        }
+
+        // Next check for the closest similarity score to AB
+        double closestDiff = 100.0;
+        int key = -1;
+        for (int i : choices) {
+            double current = similarityScoreMap.get(i);
+            double diff = Math.abs(expectedSimilarity - current);
+
+            if (diff < closestDiff) {
+                closestDiff = diff;
+                key = i;
+            }
+        }
+        System.out.println("key = " + key);
+
+        double confidence = 100 - Math.abs(expectedSimilarity - similarityScoreMap.get(key));
+        System.out.println("confidence = " + confidence);
+
+        return new PossibleAnswer(key, confidence);
+    }
+
+
+    private PatternType determinePatternType(HashMap<String, RavensFigure> figures) {
+        BufferedImage A = getImage(figures.get("A"));
+        BufferedImage B = getImage(figures.get("B"));
+        BufferedImage C = getImage(figures.get("C"));
+        BufferedImage D = getImage(figures.get("D"));
+        BufferedImage E = getImage(figures.get("E"));
+        BufferedImage F = getImage(figures.get("F"));
+        BufferedImage G = getImage(figures.get("G"));
+        BufferedImage H = getImage(figures.get("H"));
+
+        double simAB = compareSimilarity(A, B);
+        System.out.println("simAB = " + simAB);
+        double simBC = compareSimilarity(B, C);
+        System.out.println("simBC = " + simBC);
+        double simAC = compareSimilarity(A, C);
+        System.out.println("simAC = " + simAC);
+
+        double simDE = compareSimilarity(D, E);
+        System.out.println("simDE = " + simDE);
+        double simEF = compareSimilarity(E, F);
+        System.out.println("simEF = " + simEF);
+        double simDF = compareSimilarity(D, F);
+        System.out.println("simDF = " + simDF);
+
+        double simGH = compareSimilarity(G, H);
+        System.out.println("simGH = " + simGH);
+
+
+        return PatternType.HORIZONTAL_NO_CHANGE;
     }
 
     private int solve2x2(RavensProblem problem) {
@@ -117,8 +209,6 @@ public class Agent {
     }
 
     private PossibleAnswer workflow2x2(BufferedImage A, BufferedImage B, BufferedImage C, HashMap<String, BufferedImage> answers) {
-
-
         // First figure out what type of transformation is in A-B
         TransType transType = identifyTrans(A, B);
         System.out.println("transType = " + transType);
@@ -159,7 +249,7 @@ public class Agent {
             }
         }
         System.out.println("key = " + key);
-        
+
         double confidence = 100 - Math.abs(similarityOfAB - similarityScoreMap.get(key));
         System.out.println("confidence = " + confidence);
 

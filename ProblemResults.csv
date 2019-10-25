@@ -1,4 +1,16 @@
 Problem,Agent's Answer,Correct?,Correct Answer
+Basic Problem C-01,3,Correct,3
+Basic Problem C-02,2,Incorrect,4
+Basic Problem C-03,8,Incorrect,4
+Basic Problem C-04,4,Incorrect,8
+Basic Problem C-05,6,Incorrect,3
+Basic Problem C-06,8,Incorrect,7
+Basic Problem C-07,8,Incorrect,2
+Basic Problem C-08,8,Incorrect,5
+Basic Problem C-09,1,Incorrect,2
+Basic Problem C-10,2,Incorrect,7
+Basic Problem C-11,4,Correct,4
+Basic Problem C-12,8,Correct,8
 Basic Problem B-01,2,Correct,2
 Basic Problem B-02,5,Correct,5
 Basic Problem B-03,1,Correct,1
