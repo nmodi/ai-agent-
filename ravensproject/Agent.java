@@ -9,9 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.File;
-import java.nio.Buffer;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Your Agent for solving Raven's Progressive Matrices. You MUST modify this
@@ -38,7 +36,9 @@ public class Agent {
     }
 
     enum PatternType {
-        HORIZONTAL_NO_CHANGE
+        UNKNOWN,
+        INCREASING_BLACK,
+        NONE;
     }
 
     class PossibleAnswer {
@@ -93,58 +93,6 @@ public class Agent {
         HashMap<String, RavensFigure> figures = problem.getFigures();
         HashMap<String, BufferedImage> answers = new HashMap<>();
 
-
-        PatternType pattern = determinePatternType(figures);
-        int[] choices = {1, 2, 3, 4, 5, 6, 7, 8};
-
-        switch (pattern) {
-            case HORIZONTAL_NO_CHANGE: {
-                return findAnswerLike("H", figures, choices, 100.0).index;
-            }
-        }
-
-        return -1;
-    }
-
-    private PossibleAnswer findAnswerLike(String fig, HashMap<String, RavensFigure> figs, int[] choices, double expectedSimilarity) {
-
-
-        HashMap<Integer, Double> similarityScoreMap = new HashMap<>();
-        BufferedImage H = getImage(figs.get(fig));
-
-        for (int i : choices) {
-            double similarityOfCn = compareSimilarity(H, getImage(figs.get(Integer.toString(i))));
-            similarityScoreMap.put(i, similarityOfCn);
-            System.out.println("similarityOf" + fig + i + " = " + similarityOfCn);
-
-//            // Check if any are exactly equal
-            if (expectedSimilarity == similarityScoreMap.get(i)) {
-                return new PossibleAnswer(i, 100.0);
-            }
-        }
-
-        // Next check for the closest similarity score to AB
-        double closestDiff = 100.0;
-        int key = -1;
-        for (int i : choices) {
-            double current = similarityScoreMap.get(i);
-            double diff = Math.abs(expectedSimilarity - current);
-
-            if (diff < closestDiff) {
-                closestDiff = diff;
-                key = i;
-            }
-        }
-        System.out.println("key = " + key);
-
-        double confidence = 100 - Math.abs(expectedSimilarity - similarityScoreMap.get(key));
-        System.out.println("confidence = " + confidence);
-
-        return new PossibleAnswer(key, confidence);
-    }
-
-
-    private PatternType determinePatternType(HashMap<String, RavensFigure> figures) {
         BufferedImage A = getImage(figures.get("A"));
         BufferedImage B = getImage(figures.get("B"));
         BufferedImage C = getImage(figures.get("C"));
@@ -154,25 +102,142 @@ public class Agent {
         BufferedImage G = getImage(figures.get("G"));
         BufferedImage H = getImage(figures.get("H"));
 
+        PatternType row1Pattern = identifySubPattern(A, B, C);
+
+        int[] choices = {1, 2, 3, 4, 5, 6, 7, 8};
+
+        int answer = -1;
+        switch (row1Pattern) {
+            case UNKNOWN: {}
+            case NONE: {
+
+                HashMap<Integer, Double> similarityScoreMap = new HashMap<>();
+
+                for (int i : choices) {
+                    double similarityOfCn = compareSimilarity(H, getImage(figures.get(Integer.toString(i))));
+                    similarityScoreMap.put(i, similarityOfCn);
+                    System.out.println("similarityOfH" + i + " = " + similarityOfCn);
+                }
+
+                // Next check for the closest similarity score to AB
+                double closestDiff = 100.0;
+                int key = -1;
+                for (int i : choices) {
+                    double current = similarityScoreMap.get(i);
+                    double diff = Math.abs(100.0 - current);
+
+                    if (diff < closestDiff) {
+                        closestDiff = diff;
+                        key = i;
+                    }
+                }
+                answer = key;
+                break;
+            }
+            case INCREASING_BLACK: {
+                double blackPercentageA = getBlackPixelPercentage(A);
+                double blackPercentageB = getBlackPixelPercentage(B);
+                double blackPercentageC = getBlackPixelPercentage(C);
+
+                double blackPercentageD = getBlackPixelPercentage(D);
+                double blackPercentageE = getBlackPixelPercentage(E);
+                double blackPercentageF = getBlackPixelPercentage(F);
+
+                double blackPercentageG = getBlackPixelPercentage(G);
+                double blackPercentageH = getBlackPixelPercentage(H);
+
+                System.out.println("Black Pixel Percentage");
+                System.out.println( blackPercentageA + " " + blackPercentageB + " " + blackPercentageC);
+                System.out.println( blackPercentageD + " " + blackPercentageE + " " + blackPercentageF);
+                System.out.println( blackPercentageG + " " + blackPercentageH);
+                
+                double expectedBlackPixelPercent = blackPercentageH + (blackPercentageF - blackPercentageE);
+                System.out.println("expectedBlackPixelPercent = " + expectedBlackPixelPercent);
+
+                HashMap<Integer, Double> blackPercentMap = new HashMap<>();
+                for (int i : choices) {
+                    BufferedImage current = getImage(figures.get(Integer.toString(i)));
+
+                    double blackPercentageI = getBlackPixelPercentage(current);
+                    System.out.println("Answer choice " + i);
+                    System.out.println("blackPercentageI = " + blackPercentageI);
+                    blackPercentMap.put(i, blackPercentageI);
+                }
+
+                System.out.println("blackPercentMap = " + blackPercentMap);
+                double closestDiff = 100.0;
+                int key = -1;
+                for (int i : choices) {
+                    double current = blackPercentMap.get(i);
+                    double diff = Math.abs(expectedBlackPixelPercent - current);
+
+                    if (diff < closestDiff) {
+                        closestDiff = diff;
+                        key = i;
+                    }
+                }
+
+                answer = key;
+                break;
+            }
+
+            default: {
+                answer = -1;
+            }
+        }
+
+        System.out.println("answer = " + answer);
+        return answer;
+    }
+
+    private double getBlackPixelPercentage(BufferedImage image) {
+        long blackPixels = 0;
+
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                int pixel = image.getRGB(x, y);
+
+                if (pixel == 0xFF000000) blackPixels++;
+
+            }
+        }
+
+        long totalPixels = image.getWidth() * image.getHeight();
+
+        return 100.0 * blackPixels / totalPixels;
+    }
+
+    private PatternType identifySubPattern(BufferedImage A, BufferedImage B, BufferedImage C) {
+        double blackLevelA = getBlackPixelPercentage(A);
+        double blackLevelB = getBlackPixelPercentage(B);
+        double blackLevelC = getBlackPixelPercentage(C);
+
+        System.out.println("blackLevelA = " + blackLevelA + " blackLevelB = " + blackLevelB  + " blackLevelC = " + blackLevelC);
+
+        
+        double blackDiffBA = blackLevelB - blackLevelA;
+        System.out.println("blackDiffBA = " + blackDiffBA);
+        double blackDiffCB = blackLevelC - blackLevelB;
+        System.out.println("blackDiffCB = " + blackDiffCB);
+
         double simAB = compareSimilarity(A, B);
-        System.out.println("simAB = " + simAB);
         double simBC = compareSimilarity(B, C);
-        System.out.println("simBC = " + simBC);
         double simAC = compareSimilarity(A, C);
-        System.out.println("simAC = " + simAC);
+        System.out.println("simAB = " + simAB + " simBC = " + simBC + " simAC = " + simAC);
 
-        double simDE = compareSimilarity(D, E);
-        System.out.println("simDE = " + simDE);
-        double simEF = compareSimilarity(E, F);
-        System.out.println("simEF = " + simEF);
-        double simDF = compareSimilarity(D, F);
-        System.out.println("simDF = " + simDF);
+        PatternType ret;
 
-        double simGH = compareSimilarity(G, H);
-        System.out.println("simGH = " + simGH);
+        if (blackLevelB > blackLevelA && blackLevelC > blackLevelB){
+            System.out.println("This row has pattern INCREASING");
+            ret = PatternType.INCREASING_BLACK;
+        } else if ((blackDiffBA == 0.0 && blackDiffCB == 0.0)) {
+            System.out.println("This row has pattern NONE");
+            ret = PatternType.NONE;
+        } else {
+            ret = PatternType.UNKNOWN;
+        }
 
-
-        return PatternType.HORIZONTAL_NO_CHANGE;
+        return ret;
     }
 
     private int solve2x2(RavensProblem problem) {
@@ -272,6 +337,7 @@ public class Agent {
         long maxDiff = 3L * 255 * image1.getWidth() * image1.getHeight();
         double diffPercentage = 100.0 * rawdiff / maxDiff;
         double similarityPercentage = 100.0 - diffPercentage;
+
         return similarityPercentage;
     }
 
