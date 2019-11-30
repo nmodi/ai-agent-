@@ -15,6 +15,9 @@ package ravensproject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -93,7 +96,12 @@ public class RavensProject {
      * answers for all the problems, then generate grades for them.
      */
     public static void main(String[] args) {
+        long start = System.nanoTime();
         solve();
+        long duration = (System.nanoTime() - start)/1000000;
+
         RavensGrader.grade();
+        System.out.println("duration = " + duration + "ms");
+
     }
 }

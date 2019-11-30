@@ -11,6 +11,7 @@ import java.awt.image.*;
 import java.io.File;
 import java.nio.Buffer;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Your Agent for solving Raven's Progressive Matrices. You MUST modify this
@@ -33,25 +34,14 @@ public class Agent {
         ROTATE_90,
         ROTATE_180,
         ROTATE_270,
-        NONE,
-        SAME;
+        NONE
     }
 
     enum PatternType {
         UNKNOWN,
         DIAGONAL,
         INCREASING_BLACK,
-        NONE;
-    }
-
-    class PossibleAnswer {
-        public int index;
-        public double confidence;
-
-        public PossibleAnswer (int index, double confidence) {
-            this.index = index;
-            this.confidence = confidence;
-        }
+        NONE
     }
 
     /**
@@ -83,10 +73,9 @@ public class Agent {
         System.out.println("- - -");
         System.out.println(problem.getName());
 
-        if (problem.getProblemType().equals("2x2")) {
-            return solve2x2(problem);
-        } else if (problem.getProblemType().equals("3x3")) {
-            return solve3x3(problem); 
+
+        if (problem.getProblemType().equals("3x3")) {
+            return solve3x3(problem);
         }
 
         return -1;
@@ -107,24 +96,33 @@ public class Agent {
         PatternType pattern = determine3x3Pattern(figures);
         System.out.println("pattern = " + pattern);
         int[] choices = {1, 2, 3, 4, 5, 6, 7, 8};
-        int answer = -1;
+        int answer;
         switch (pattern) {
 
-            case UNKNOWN: {}
+            case UNKNOWN: {
+                answer = findAnswerChoiceClosestTo("E", choices, figures);
+                break;
+            }
             case NONE: {
                 answer = findAnswerChoiceClosestTo("H", choices, figures);
                 break;
 
             }
             case INCREASING_BLACK: {
-                answer = getIncreasingBlackAnswer(figures, A, B, C, D, E, F, G, H, choices);
+                double blackPercentage = getExpectedBlackPercentage(figures, "E", "F", "H");
+                answer = getAnswerByBlackPercentage(figures, choices, blackPercentage);
                 break;
             }
             case DIAGONAL: {
                 // found diagonal pattern
-                // now look for which answer choice closely matches A B
-                answer = findAnswerChoiceClosestTo("E", choices, figures);
+                // now look for which answer choice closely matches A-E
+                // instead maybe, let's look for an answer that has the same delta from A to E.
+
+                double blackPercentage = getExpectedBlackPercentage(figures, "A", "E", "E");
+//                answer = findAnswerChoiceClosestTo("E", choices, figures);
+                answer = getAnswerByBlackPercentage(figures, choices, blackPercentage);
                 break;
+
             }
 
             default: {
@@ -136,26 +134,30 @@ public class Agent {
         return answer;
     }
 
-    private int getIncreasingBlackAnswer(HashMap<String, RavensFigure> figures, BufferedImage a, BufferedImage b, BufferedImage c, BufferedImage d, BufferedImage e, BufferedImage f, BufferedImage g, BufferedImage h, int[] choices) {
-        double blackPercentageA = getBlackPixelPercentage(a);
-        double blackPercentageB = getBlackPixelPercentage(b);
-        double blackPercentageC = getBlackPixelPercentage(c);
+    private double getExpectedBlackPercentage(HashMap<String, RavensFigure> figures, String x1, String x2, String y1) {
+//        double blackPercentageC = getBlackPixelPercentage(getImage(figures.get("C")));
+//        double blackPercentageA = getBlackPixelPercentage(getImage(figures.get("A")));
+//        double blackPercentageB = getBlackPixelPercentage(getImage(figures.get("B")));
 
-        double blackPercentageD = getBlackPixelPercentage(d);
-        double blackPercentageE = getBlackPixelPercentage(e);
-        double blackPercentageF = getBlackPixelPercentage(f);
+//        double blackPercentageD = getBlackPixelPercentage(getImage(figures.get("D")));
+        double blackPercentageE = getBlackPixelPercentage(getImage(figures.get(x1)));
+        double blackPercentageF = getBlackPixelPercentage(getImage(figures.get(x2)));
 
-        double blackPercentageG = getBlackPixelPercentage(g);
-        double blackPercentageH = getBlackPixelPercentage(h);
+//        double blackPercentageG = getBlackPixelPercentage(getImage(figures.get("G")));
+        double blackPercentageH = getBlackPixelPercentage(getImage(figures.get(y1)));
 
-        System.out.println("Black Pixel Percentage");
-        System.out.println( blackPercentageA + " " + blackPercentageB + " " + blackPercentageC);
-        System.out.println( blackPercentageD + " " + blackPercentageE + " " + blackPercentageF);
-        System.out.println( blackPercentageG + " " + blackPercentageH);
+//        System.out.println("Black Pixel Percentage");
+//        System.out.println( blackPercentageA + " " + blackPercentageB + " " + blackPercentageC);
+//        System.out.println( blackPercentageD + " " + blackPercentageE + " " + blackPercentageF);
+//        System.out.println( blackPercentageG + " " + blackPercentageH);
 
         double expectedBlackPixelPercent = blackPercentageH + (blackPercentageF - blackPercentageE);
         System.out.println("expectedBlackPixelPercent = " + expectedBlackPixelPercent);
 
+        return expectedBlackPixelPercent;
+    }
+
+    private int getAnswerByBlackPercentage(HashMap<String, RavensFigure> figures, int[] choices, double expectedBlackPercentage) {
         HashMap<Integer, Double> blackPercentMap = new HashMap<>();
         for (int i : choices) {
             BufferedImage current = getImage(figures.get(Integer.toString(i)));
@@ -171,7 +173,7 @@ public class Agent {
         int key = -1;
         for (int i : choices) {
             double current = blackPercentMap.get(i);
-            double diff = Math.abs(expectedBlackPixelPercent - current);
+            double diff = Math.abs(expectedBlackPercentage - current);
 
             if (diff < closestDiff) {
                 closestDiff = diff;
@@ -193,12 +195,34 @@ public class Agent {
         BufferedImage H = getImage(figures.get("H"));
 
         TransType transType = identifyTrans(A, B);
+        System.out.println("A-E transType = " + transType);
 
-//        if (transType == TransType.SAME) {
-//            return PatternType.DIAGONAL;
-//        } else {
-            return identifySubPattern(A, B, C);
-//        }
+        PatternType row1 = identifySubPattern(A, B, C);
+        System.out.println("row1 = " + row1);
+        PatternType row2 = identifySubPattern(D, E, F);
+        System.out.println("row2 = " + row2);
+        
+
+
+        if (PatternType.NONE == row1 && PatternType.NONE == row2)
+            return PatternType.NONE;
+        else if (transType == TransType.NONE)
+            return PatternType.DIAGONAL;
+        else if (row1 != row2)
+            return PatternType.DIAGONAL;
+        else {
+            PatternType col1 = identifySubPattern(A, D, G);
+            System.out.println("col1 = " + col1);
+            PatternType col2 = identifySubPattern(B, E, H);
+            System.out.println("col2 = " + col2);
+
+            if (PatternType.INCREASING_BLACK == col1 && PatternType.INCREASING_BLACK == col2)
+                return PatternType.INCREASING_BLACK;
+            else if (PatternType.INCREASING_BLACK == col2)
+                return PatternType.DIAGONAL;
+        }
+
+        return PatternType.UNKNOWN;
     }
 
     private int findAnswerChoiceClosestTo(String Xname, int[] choices, HashMap<String, RavensFigure> figures){
@@ -267,97 +291,16 @@ public class Agent {
         PatternType ret;
 
         if (blackLevelB > blackLevelA && blackLevelC > blackLevelB){
-            System.out.println("This row has pattern INCREASING");
+//            System.out.println("This row has pattern INCREASING");
             ret = PatternType.INCREASING_BLACK;
         } else if ((blackDiffBA == 0.0 && blackDiffCB == 0.0)) {
-            System.out.println("This row has pattern NONE");
+//            System.out.println("This row has pattern NONE");
             ret = PatternType.NONE;
         } else {
             ret = PatternType.UNKNOWN;
         }
 
         return ret;
-    }
-
-    private int solve2x2(RavensProblem problem) {
-        HashMap<String, RavensFigure> figures = problem.getFigures();
-        HashMap<String, BufferedImage> answers = new HashMap<>();
-
-
-        for (String i : figures.keySet()) {
-            answers.put(i, getImage(figures.get(i)));
-        }
-
-
-        BufferedImage A = getImage(figures.get("A"));
-        BufferedImage B = getImage(figures.get("B"));
-        BufferedImage C = getImage(figures.get("C"));
-
-        PossibleAnswer possibility = workflow2x2(A, B, C, answers);
-
-        if (possibility.confidence > 90.0) {
-            return possibility.index;
-        } else {
-            A = blurImage(A);
-            B = blurImage(B);
-            C = blurImage(C);
-
-            for (String i : figures.keySet()) {
-                BufferedImage blurred = blurImage(getImage(figures.get(i)));
-                answers.put(i, blurred);
-            }
-
-            PossibleAnswer blurredPossibility = workflow2x2(A,B,C,answers);
-            return blurredPossibility.index;
-        }
-    }
-
-    private PossibleAnswer workflow2x2(BufferedImage A, BufferedImage B, BufferedImage C, HashMap<String, BufferedImage> answers) {
-        // First figure out what type of transformation is in A-B
-        TransType transType = identifyTrans(A, B);
-        System.out.println("transType = " + transType);
-
-        // Apply that transformation to A and C
-        BufferedImage transformedA = applyTransType(transType, A);
-        BufferedImage transformedC = applyTransType(transType, C);
-
-        // Check sim score of A-B
-        double similarityOfAB = compareSimilarity(transformedA, B);
-        System.out.println("similarityOfAB = " + similarityOfAB);
-
-        // Find closest match in answers
-        int[] choices = {1, 2, 3, 4, 5, 6};
-        HashMap<Integer, Double> similarityScoreMap = new HashMap<>();
-
-        for (int i : choices) {
-            double similarityOfCn = compareSimilarity(transformedC, answers.get(Integer.toString(i)));
-            similarityScoreMap.put(i, similarityOfCn);
-            System.out.println("similarityOfC" + i + " = " + similarityOfCn);
-
-            // Check if any are exactly equal
-            if (similarityOfAB == similarityScoreMap.get(i)) {
-                return new PossibleAnswer(i, 100.0);
-            }
-        }
-
-        // Next check for the closest similarity score to AB
-        double closestDiff = 100.0;
-        int key = -1;
-        for (int i : choices) {
-            double current = similarityScoreMap.get(i);
-            double diff = Math.abs(similarityOfAB - current);
-
-            if (diff < closestDiff) {
-                closestDiff = diff;
-                key = i;
-            }
-        }
-        System.out.println("key = " + key);
-
-        double confidence = 100 - Math.abs(similarityOfAB - similarityScoreMap.get(key));
-        System.out.println("confidence = " + confidence);
-
-        return new PossibleAnswer(key, confidence);
     }
 
     private double compareSimilarity(BufferedImage image1, BufferedImage image2) {
@@ -436,8 +379,9 @@ public class Agent {
             }
         }
 
-        if (maxEntry.getValue() > 0) return TransType.SAME;
-        else return maxEntry.getKey();
+//        if (maxEntry.getValue() > 0) return TransType.SAME;
+//        else
+        return maxEntry.getKey();
     }
 
     private BufferedImage applyTransType(TransType type, BufferedImage image) {
@@ -527,15 +471,6 @@ public class Agent {
             }
         }
 
-        return clone;
-    }
-
-    private BufferedImage blurImage(BufferedImage image) {
-        Kernel kernel = new Kernel(3, 3, new float[] { 1f / 9f, 1f / 9f, 1f / 9f,
-                1f / 9f, 1f / 9f, 1f / 9f, 1f / 9f, 1f / 9f, 1f / 9f });
-        BufferedImageOp op = new ConvolveOp(kernel);
-        BufferedImage clone = cloneImage(image);
-        clone = op.filter(clone, null);
         return clone;
     }
 
