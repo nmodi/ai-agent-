@@ -3,23 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="17753565-e568-4b00-bc8a-dea1ebf2b83d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgentAnswers.csv" beforeDir="false" afterPath="$PROJECT_DIR$/AgentAnswers.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProblemResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ProblemResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SetResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/SetResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/AgentAnswers.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/AgentAnswers.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/ProblemResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/ProblemResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/SetResults.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/SetResults.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent$PossibleAnswer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent$TransType.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent$TransType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/Agent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/RavensProject.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/ravensproject/RavensProject.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ai-agent-/student.zip" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ai-agent-/student.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ravensproject/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/ravensproject/Agent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ravensproject/RavensProject.java" beforeDir="false" afterPath="$PROJECT_DIR$/ravensproject/RavensProject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/student.zip" beforeDir="false" afterPath="$PROJECT_DIR$/student.zip" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
