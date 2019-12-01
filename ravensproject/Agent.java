@@ -120,7 +120,7 @@ public class Agent {
                 // instead maybe, let's look for an answer that has the same delta from A to E.
 
                 double blackPercentage = getExpectedBlackPercentage(figures, "A", "E", "E");
-//                answer = findAnswerChoiceClosestTo("E", choices, figures);
+                answer = findAnswerChoiceClosestTo("E", choices, figures);
                 answer = getAnswerByBlackPercentage(figures, choices, blackPercentage);
                 break;
 
@@ -131,7 +131,7 @@ public class Agent {
                 BufferedImage H = getImage(figures.get("H"));
                 BufferedImage expectedImage = addImages(G, H);
 
-//                printImage(expectedImage, problem.getName().substring(14));
+                printImage(expectedImage, problem.getName().substring(14));
 
                 answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
                 break;
@@ -142,7 +142,7 @@ public class Agent {
                 BufferedImage H = getImage(figures.get("H"));
                 BufferedImage expectedImage = subtractImages(G, H);
 
-//                printImage(expectedImage, problem.getName().substring(14));
+                printImage(expectedImage, problem.getName().substring(14));
 
                 answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
                 break;
@@ -153,7 +153,7 @@ public class Agent {
                 BufferedImage H = getImage(figures.get("H"));
                 BufferedImage expectedImage = xorImages(G, H);
 
-//                printImage(expectedImage, problem.getName().substring(14));
+                printImage(expectedImage, problem.getName().substring(14));
 
                 answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
                 break;
@@ -164,7 +164,7 @@ public class Agent {
                 BufferedImage H = getImage(figures.get("H"));
                 BufferedImage expectedImage = andImages(G, H);
 
-//                printImage(expectedImage, problem.getName().substring(14));
+                printImage(expectedImage, problem.getName().substring(14));
 
                 answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
                 break;
@@ -236,13 +236,13 @@ public class Agent {
         System.out.println("row2 = " + row2);
         
 
-        if (PatternType.ADDITION == row1)
+        if (PatternType.ADDITION == row1 && PatternType.ADDITION == row2)
             return row1;
-        if (PatternType.SUBTRACTION == row1)
+        if (PatternType.SUBTRACTION == row1 && PatternType.SUBTRACTION == row2)
             return row1;
-        if (PatternType.XOR == row1)
+        if (PatternType.XOR == row1 && PatternType.XOR == row2)
             return row1;
-        if (PatternType.AND == row1)
+        if (PatternType.AND == row1 && PatternType.AND == row2)
             return row1;
         else if (PatternType.NONE == row1 && PatternType.NONE == row2)
             return PatternType.NONE;
@@ -322,15 +322,13 @@ public class Agent {
         System.out.println("andSimilarity = " + andSimilarity);
 
 
-        if (xorSimilarity > additionSimilarity)
+        if (xorSimilarity > 95 && xorSimilarity > additionSimilarity)
             return PatternType.XOR;
-
-        if (andSimilarity > additionSimilarity)
+        else if (andSimilarity > 95 && andSimilarity > additionSimilarity)
             return PatternType.AND;
-
-        if (additionSimilarity > 90 && additionSimilarity > subtractionSimilarity)
+        else if (additionSimilarity > 95 && additionSimilarity > subtractionSimilarity)
             return PatternType.ADDITION;
-        else if (subtractionSimilarity > 90 && subtractionSimilarity > additionSimilarity)
+        else if (subtractionSimilarity > 95 && subtractionSimilarity > additionSimilarity)
             return PatternType.SUBTRACTION;
 
 
