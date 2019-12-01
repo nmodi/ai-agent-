@@ -6,9 +6,11 @@ package ravensproject;
 //import javax.imageio.ImageIO;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.Buffer;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -41,8 +43,15 @@ public class Agent {
         UNKNOWN,
         DIAGONAL,
         INCREASING_BLACK,
-        NONE
+        NONE,
+        ADDITION,
+        SUBTRACTION,
+        AND,
+        XOR
     }
+
+    final int BLACK = Color.BLACK.getRGB();
+    final int WHITE = Color.WHITE.getRGB();
 
     /**
      * The default constructor for your Agent. Make sure to execute any
@@ -84,17 +93,9 @@ public class Agent {
     private int solve3x3(RavensProblem problem) {
         HashMap<String, RavensFigure> figures = problem.getFigures();
 
-        BufferedImage A = getImage(figures.get("A"));
-        BufferedImage B = getImage(figures.get("B"));
-        BufferedImage C = getImage(figures.get("C"));
-        BufferedImage D = getImage(figures.get("D"));
-        BufferedImage E = getImage(figures.get("E"));
-        BufferedImage F = getImage(figures.get("F"));
-        BufferedImage G = getImage(figures.get("G"));
-        BufferedImage H = getImage(figures.get("H"));
-
         PatternType pattern = determine3x3Pattern(figures);
         System.out.println("pattern = " + pattern);
+
         int[] choices = {1, 2, 3, 4, 5, 6, 7, 8};
         int answer;
         switch (pattern) {
@@ -125,6 +126,50 @@ public class Agent {
 
             }
 
+            case ADDITION: {
+                BufferedImage G = getImage(figures.get("G"));
+                BufferedImage H = getImage(figures.get("H"));
+                BufferedImage expectedImage = addImages(G, H);
+
+//                printImage(expectedImage, problem.getName().substring(14));
+
+                answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
+                break;
+            }
+
+            case SUBTRACTION: {
+                BufferedImage G = getImage(figures.get("G"));
+                BufferedImage H = getImage(figures.get("H"));
+                BufferedImage expectedImage = subtractImages(G, H);
+
+//                printImage(expectedImage, problem.getName().substring(14));
+
+                answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
+                break;
+            }
+
+            case XOR: {
+                BufferedImage G = getImage(figures.get("G"));
+                BufferedImage H = getImage(figures.get("H"));
+                BufferedImage expectedImage = xorImages(G, H);
+
+//                printImage(expectedImage, problem.getName().substring(14));
+
+                answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
+                break;
+            }
+
+            case AND: {
+                BufferedImage G = getImage(figures.get("G"));
+                BufferedImage H = getImage(figures.get("H"));
+                BufferedImage expectedImage = andImages(G, H);
+
+//                printImage(expectedImage, problem.getName().substring(14));
+
+                answer = findAnswerChoiceClosestTo(expectedImage, choices, figures);
+                break;
+            }
+
             default: {
                 answer = -1;
             }
@@ -135,21 +180,9 @@ public class Agent {
     }
 
     private double getExpectedBlackPercentage(HashMap<String, RavensFigure> figures, String x1, String x2, String y1) {
-//        double blackPercentageC = getBlackPixelPercentage(getImage(figures.get("C")));
-//        double blackPercentageA = getBlackPixelPercentage(getImage(figures.get("A")));
-//        double blackPercentageB = getBlackPixelPercentage(getImage(figures.get("B")));
-
-//        double blackPercentageD = getBlackPixelPercentage(getImage(figures.get("D")));
         double blackPercentageE = getBlackPixelPercentage(getImage(figures.get(x1)));
         double blackPercentageF = getBlackPixelPercentage(getImage(figures.get(x2)));
-
-//        double blackPercentageG = getBlackPixelPercentage(getImage(figures.get("G")));
         double blackPercentageH = getBlackPixelPercentage(getImage(figures.get(y1)));
-
-//        System.out.println("Black Pixel Percentage");
-//        System.out.println( blackPercentageA + " " + blackPercentageB + " " + blackPercentageC);
-//        System.out.println( blackPercentageD + " " + blackPercentageE + " " + blackPercentageF);
-//        System.out.println( blackPercentageG + " " + blackPercentageH);
 
         double expectedBlackPixelPercent = blackPercentageH + (blackPercentageF - blackPercentageE);
         System.out.println("expectedBlackPixelPercent = " + expectedBlackPixelPercent);
@@ -203,8 +236,15 @@ public class Agent {
         System.out.println("row2 = " + row2);
         
 
-
-        if (PatternType.NONE == row1 && PatternType.NONE == row2)
+        if (PatternType.ADDITION == row1)
+            return row1;
+        if (PatternType.SUBTRACTION == row1)
+            return row1;
+        if (PatternType.XOR == row1)
+            return row1;
+        if (PatternType.AND == row1)
+            return row1;
+        else if (PatternType.NONE == row1 && PatternType.NONE == row2)
             return PatternType.NONE;
         else if (transType == TransType.NONE)
             return PatternType.DIAGONAL;
@@ -225,10 +265,19 @@ public class Agent {
         return PatternType.UNKNOWN;
     }
 
+    private int findAnswerChoiceClosestTo(BufferedImage x, int[] choices, HashMap<String, RavensFigure> figures){
+        return findAnswerChoiceClosestTo(null, x, choices, figures);
+    }
+
     private int findAnswerChoiceClosestTo(String Xname, int[] choices, HashMap<String, RavensFigure> figures){
+        return findAnswerChoiceClosestTo(Xname, null, choices, figures);
+    }
+
+    private int findAnswerChoiceClosestTo(String Xname, BufferedImage X, int[] choices, HashMap<String, RavensFigure> figures){
         HashMap<Integer, Double> similarityScoreMap = new HashMap<>();
 
-        BufferedImage X = getImage(figures.get(Xname));
+        X = X != null ? X : getImage(figures.get(Xname));
+        Xname = Xname != null ? Xname : "X";
 
         for (int i : choices) {
             double similarityOfCn = compareSimilarity(X, getImage(figures.get(Integer.toString(i))));
@@ -253,24 +302,40 @@ public class Agent {
     }
 
 
-    private double getBlackPixelPercentage(BufferedImage image) {
-        long blackPixels = 0;
 
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
-                int pixel = image.getRGB(x, y);
-
-                if (pixel == 0xFF000000) blackPixels++;
-
-            }
-        }
-
-        long totalPixels = image.getWidth() * image.getHeight();
-
-        return 100.0 * blackPixels / totalPixels;
-    }
 
     private PatternType identifySubPattern(BufferedImage A, BufferedImage B, BufferedImage C) {
+        BufferedImage subtraction = subtractImages(A, B);
+        double subtractionSimilarity = compareSimilarity(subtraction, C);
+        System.out.println("subtractionSimilarity = " + subtractionSimilarity);
+
+        BufferedImage addition = addImages(A, B);
+        double additionSimilarity = compareSimilarity(addition, C);
+        System.out.println("additionSimilarity = " + additionSimilarity);
+
+        BufferedImage xor = xorImages(A, B);
+        double xorSimilarity = compareSimilarity(xor, C);
+        System.out.println("xorSimilarity = " + xorSimilarity);
+
+        BufferedImage and = andImages(A, B);
+        double andSimilarity = compareSimilarity(and, C);
+        System.out.println("andSimilarity = " + andSimilarity);
+
+
+        if (xorSimilarity > additionSimilarity)
+            return PatternType.XOR;
+
+        if (andSimilarity > additionSimilarity)
+            return PatternType.AND;
+
+        if (additionSimilarity > 90 && additionSimilarity > subtractionSimilarity)
+            return PatternType.ADDITION;
+        else if (subtractionSimilarity > 90 && subtractionSimilarity > additionSimilarity)
+            return PatternType.SUBTRACTION;
+
+
+
+
         double blackLevelA = getBlackPixelPercentage(A);
         double blackLevelB = getBlackPixelPercentage(B);
         double blackLevelC = getBlackPixelPercentage(C);
@@ -367,7 +432,7 @@ public class Agent {
         BufferedImage rotated270 = applyTransType(TransType.ROTATE_270, first);
         transScoresMap.put(TransType.ROTATE_270, compareSimilarity(rotated270, second));
 
-        System.out.println("transScoresMap = " + transScoresMap);
+//        System.out.println("transScoresMap = " + transScoresMap);
 
         Map.Entry<TransType, Double> maxEntry = null;
         for (Map.Entry<TransType, Double> entry : transScoresMap.entrySet())
@@ -379,8 +444,6 @@ public class Agent {
             }
         }
 
-//        if (maxEntry.getValue() > 0) return TransType.SAME;
-//        else
         return maxEntry.getKey();
     }
 
@@ -474,11 +537,102 @@ public class Agent {
         return clone;
     }
 
+    private BufferedImage addImages(BufferedImage first, BufferedImage second) {
+        BufferedImage clone = cloneImage(first);
+
+        for (int x = 0; x < clone.getWidth(); x++) {
+            for (int y = 0; y < clone.getHeight(); y++) {
+                int pixel1 = first.getRGB(x, y);
+                int pixel2 = second.getRGB(x, y);
+
+                if (BLACK == pixel1 || BLACK  == pixel2)
+                    clone.setRGB(x, y, Color.BLACK.getRGB());
+            }
+        }
+
+        return clone;
+    }
+
+    private BufferedImage subtractImages(BufferedImage first, BufferedImage second) {
+        BufferedImage clone = cloneImage(first);
+
+        for (int x = 0; x < clone.getWidth(); x++) {
+            for (int y = 0; y < clone.getHeight(); y++) {
+                int pixel1 = first.getRGB(x, y);
+                int pixel2 = second.getRGB(x, y);
+
+                if (BLACK == pixel1 && BLACK  == pixel2)
+                    clone.setRGB(x, y, WHITE);
+            }
+        }
+
+        return clone;
+    }
+
+    private BufferedImage xorImages(BufferedImage first, BufferedImage second) {
+        BufferedImage clone = cloneImage(first);
+
+        for (int x = 0; x < clone.getWidth(); x++) {
+            for (int y = 0; y < clone.getHeight(); y++) {
+                int pixel1 = first.getRGB(x, y);
+                int pixel2 = second.getRGB(x, y);
+
+                if (BLACK == pixel1 || BLACK  == pixel2)
+                    clone.setRGB(x, y, BLACK);
+                if (BLACK == pixel1 && BLACK  == pixel2)
+                    clone.setRGB(x, y, WHITE);
+            }
+        }
+
+        return clone;
+    }
+
+    private BufferedImage andImages(BufferedImage first, BufferedImage second) {
+        BufferedImage clone = cloneImage(first);
+
+        for (int x = 0; x < clone.getWidth(); x++) {
+            for (int y = 0; y < clone.getHeight(); y++) {
+                int pixel1 = first.getRGB(x, y);
+                int pixel2 = second.getRGB(x, y);
+
+                if (BLACK == pixel1 && BLACK  == pixel2)
+                    clone.setRGB(x, y, BLACK);
+                else clone.setRGB(x, y, WHITE);
+            }
+        }
+
+        return clone;
+    }
+
     private BufferedImage cloneImage(BufferedImage image) {
         ColorModel model = image.getColorModel();
         WritableRaster raster = image.copyData(null);
         BufferedImage clone = new BufferedImage(model, raster, model.isAlphaPremultiplied(), null);
         return clone;
+    }
+
+    private double getBlackPixelPercentage(BufferedImage image) {
+        long blackPixels = 0;
+
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                int pixel = image.getRGB(x, y);
+                if (BLACK == pixel) blackPixels++;
+            }
+        }
+
+        long totalPixels = image.getWidth() * image.getHeight();
+        return 100.0 * blackPixels / totalPixels;
+    }
+
+    private void printImage(BufferedImage image, String fileName) {
+        try {
+            File outputfile = new File(fileName + ".png");
+            ImageIO.write(image, "png", outputfile);
+            System.out.println("printed");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
